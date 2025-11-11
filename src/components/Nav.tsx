@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, Search, User, ShoppingCart, ChevronDown } from "lucide-react";
-import { useCart } from "@/contexts/cart-context";
+import { useShopifyCart } from "@/contexts/shopify-cart-context";
 import { useCurrency } from "@/contexts/currency-context";
+import { shopifyAuth } from "@/lib/shopify-auth";
 
 import { cn } from "@/lib/utils";
 import {
@@ -48,44 +49,15 @@ const navItems: NavItem[] = [
   {
     label: "Shop",
     children: [
-      { label: "Bestsellers", href: "/collections/all-products" },
+      { label: "All Products", href: "/collections/all-products" },
       {
-        label: "Summer Baby Shoes",
-        href: "/collections/summer-baby-shoes",
+        label: "New Collection",
+        href: "/collections/new-collection",
       },
-      { label: "Winter Baby Shoes", href: "/collections/winter-shoes" },
-      { label: "Mesh Baby Shoes", href: "/collections/kids-mesh-shoes" },
       { label: "Bamboo Baby Shoes", href: "/collections/bamboo-baby-shoes" },
-      { label: "Aqua Baby Shoes", href: "/collections/aqua-shoes" },
-      { label: "All Baby & Toddler Shoes", href: "/collections/all-products" },
-      {
-        label: "Animal Baby Shoes",
-        href: "/collections/animal-baby-shoes",
-      },
-      { label: "New Baby Gifts", href: "/collections/gift-packs" },
-      { label: "Baby Shoe Insoles", href: "/products/attipas-insoles" },
-      { label: "Crawling Knee Pads", href: "/collections/knee-pads" },
-      { label: "Non Slip Baby Socks", href: "/collections/baby-socks" },
-      {
-        label: "Larger Baby Shoes (US 7.5-8.5)",
-        href: "/collections/larger-sizes",
-      },
-      { label: "Baby Feeding & Teething", href: "/collections/silicone-baby-feeding-set" },
-      { label: "Sale", href: "/collections/on-sale-items" },
-      // {
-      //   label: "Bundle & Save",
-      //   href: "https://www.attipas.com.au/collections/baby-shoes-x-2-bundle-save-10-off",
-      //   children: [
-      //     {
-      //       label: "Twin Packs (Save 10%)",
-      //       href: "https://www.attipas.com.au/collections/baby-shoes-x-2-bundle-save-10-off",
-      //     },
-      //     {
-      //       label: "Buy 4, Save 15%",
-      //       href: "https://www.attipas.com.au/apps/bundles/bundle/27169",
-      //     },
-      //   ],
-      // },
+      { label: "Aqua Baby Shoes", href: "/collections/aqua-baby-shoes" },
+      { label: "Baby Socks Shoes", href: "/collections/baby-socks-shoes" },
+      { label: "Toddler's Skin Shoes", href: "/collections/toddler-skin-shoes" },
     ],
   },
   { label: "Sizing", href: "/size-guide" },
@@ -134,7 +106,7 @@ const navItems: NavItem[] = [
 
 export default function Nav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const { totalItems } = useCart();
+  const { totalItems } = useShopifyCart();
   const { currency, setCurrency } = useCurrency();
 
   return (
@@ -166,8 +138,8 @@ export default function Nav() {
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       {item.label === "Shop" ? (
-                        <div className="p-4 w-[600px]">
-                          <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+                        <div className="p-4 w-[400px]">
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-2">
                             {item.children.map((child) => (
                               <div key={child.label}>
                                 <Link
@@ -240,11 +212,15 @@ export default function Nav() {
               <Search className="h-10 w-10 text-text-primary font-bold" />
             </Button>
             {/* Account Button */}
-            <Link href="/account" passHref>
-              <Button variant="ghost" size="icon" aria-label="Account" className="cursor-pointer">
-                <User className="h-10 w-10 text-text-primary font-bold" />
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              aria-label="Account" 
+              className="cursor-pointer"
+              onClick={() => shopifyAuth.account()}
+            >
+              <User className="h-10 w-10 text-text-primary font-bold" />
+            </Button>
             {/* Cart Button */}
             <Link href="/cart" passHref>
               <Button variant="ghost" size="icon" aria-label="Cart" className="relative cursor-pointer">
@@ -285,12 +261,16 @@ export default function Nav() {
                 </Button>
               </Link>
             </SheetTrigger>
-            <SheetTrigger>
-              <Link href="/account" passHref>
-                <Button variant="ghost" size="icon" aria-label="Account" className="lg:hidden">
-                  <User className="h-5 w-5 text-text-primary" />
-                </Button>
-              </Link>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                aria-label="Account" 
+                className="lg:hidden"
+                onClick={() => shopifyAuth.account()}
+              >
+                <User className="h-5 w-5 text-text-primary" />
+              </Button>
             </SheetTrigger>
 
             <SheetTrigger>

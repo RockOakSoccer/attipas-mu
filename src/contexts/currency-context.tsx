@@ -29,7 +29,7 @@ const currencySymbols: Record<Currency, string> = {
   CAD: "C$",
   EUR: "€",
   GBP: "£",
-  MUR: "₨",
+  MUR: "Rs",
 };
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {

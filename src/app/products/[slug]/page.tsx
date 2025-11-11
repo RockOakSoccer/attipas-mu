@@ -1,710 +1,254 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Minus, Plus, Star, ShieldCheck, Truck, RefreshCcw, Share2, Heart, ZoomIn } from "lucide-react";
+import { ChevronRight, Minus, Plus, Star, ShieldCheck, Truck, RefreshCcw, Share2, Heart, Loader2, Eye } from "lucide-react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { useCart } from "@/contexts/cart-context";
+import { useShopifyCart } from "@/contexts/shopify-cart-context";
 import { useCurrency } from "@/contexts/currency-context";
-
+import { getProductByHandle, ShopifyProduct } from "@/lib/shopify";
+import { notFound } from "next/navigation";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://djunoemhhucuiipi.public.blob.vercel-storage.com';
-// Mock product data - in production, this would come from a database or API
+
 type ProductSize = {
+    id: string;
     label: string;
     value: string;
     ageRange: string;
+    available: boolean;
+    quantityAvailable: number;
 };
 
-type ProductDetails = {
-    material: string;
-    sole: string;
-    care: string;
-    origin: string;
-};
+// Transform Shopify product to local product format
+const transformShopifyProduct = (shopifyProduct: ShopifyProduct) => {
+    const firstVariant = shopifyProduct.variants.edges[0]?.node;
+    const images = shopifyProduct.images.edges.map(edge => edge.node.url);
 
-type Product = {
-    name: string;
-    slug: string;
-    price: number;
-    salePrice: number | null;
-    rating: number;
-    reviewCount: number;
-    description: string;
-    features: string[];
-    details: ProductDetails;
-    sizes: ProductSize[];
-    images: string[];
-    badges: string[];
-};
+    // Check if product is on sale - handle both price structures
+    const originalPrice = firstVariant?.compareAtPrice ? parseFloat(firstVariant.compareAtPrice.amount) : null;
+    const salePrice = firstVariant ? parseFloat(firstVariant.price.amount) : 0;
+    const onSale = originalPrice ? originalPrice > salePrice : false;
 
-const PRODUCT_DATA: Record<string, Product> = {
-    "pop-peach": {
-        name: "Breathable Bamboo - Pop Peach",
-        slug: "pop-peach",
-        price: 31.00,
-        salePrice: null,
-        rating: 4.9,
-        reviewCount: 127,
-        description: "Introducing our Breathable Bamboo Pop Peach baby shoes - the perfect combination of comfort, style, and functionality for your little one's growing feet.",
-        features: [
-            "Made with breathable bamboo fabric for ultimate comfort",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care",
-            "Recommended for ages 6 months to 4 years"
-        ],
-        details: {
-            material: "60% Bamboo, 30% Cotton, 10% Elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
+    // Generate sizes from variants
+    const sizes: ProductSize[] = shopifyProduct.variants.edges.map((edge) => {
+        const variant = edge.node;
+        const sizeOption = variant.selectedOptions.find(option => option.name.toLowerCase() === 'size');
+        const sizeLabel = sizeOption?.value || variant.title;
 
-        ],
-        badges: ["BESTSELLER", "SHOE-SOCKS"]
-    },
-    "aqua-shoes-sun-yellow": {
-        name: "Breathable Bamboo - Sun Yellow",
-        slug: "aqua-shoes-sun-yellow",
-        price: 31.00,
-        salePrice: null,
-        rating: 4.8,
-        reviewCount: 93,
-        description: "Brighten up your baby's steps with our vibrant Sun Yellow breathable bamboo shoes. Perfect for active toddlers who love to explore!",
-        features: [
-            "Made with breathable bamboo fabric for ultimate comfort",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care",
-            "Recommended for ages 6 months to 4 years"
-        ],
-        details: {
-            material: "60% Bamboo, 30% Cotton, 10% Elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "NEW"]
-    },
-    "attipas-endangered-koala-gray": {
-        name: "Attipas Koala - Grey",
-        slug: "attipas-endangered-koala-gray",
-        price: 31.00,
-        salePrice: null,
-        rating: 5.0,
-        reviewCount: 156,
-        description: "Adorable koala design that supports endangered species awareness. These comfortable baby shoes are perfect for little explorers.",
-        features: [
-            "Cute koala design with educational value",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "SHOE-SOCKS"]
-    },
-    "breathable-bamboo-cat-pink": {
-        name: "First Walking Shoes - Cat Pink",
-        slug: "breathable-bamboo-cat-pink",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.8,
-        reviewCount: 89,
-        description: "Adorable cat-themed baby shoes with breathable bamboo fabric. Perfect for little ones who love cute animal designs.",
-        features: [
-            "Cute cat design with breathable bamboo fabric",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care",
-            "Recommended for ages 6 months to 4 years"
-        ],
-        details: {
-            material: "60% Bamboo, 30% Cotton, 10% Elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "20% OFF"]
-    },
-    "breathable-bamboo-butterfly-purple": {
-        name: "First Walking Shoes - Butterfly Purple",
-        slug: "breathable-bamboo-butterfly-purple",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.7,
-        reviewCount: 76,
-        description: "Beautiful butterfly design in purple with breathable bamboo fabric. Perfect for little ones who love colorful designs.",
-        features: [
-            "Beautiful butterfly design with breathable bamboo fabric",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care",
-            "Recommended for ages 6 months to 4 years"
-        ],
-        details: {
-            material: "60% Bamboo, 30% Cotton, 10% Elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER"]
-    },
-    "breathable-bamboo": {
-        name: "First Walking Shoes - Breathable Bamboo",
-        slug: "breathable-bamboo",
-        price: 44.00,
-        salePrice: null,
-        rating: 4.9,
-        reviewCount: 203,
-        description: "Our premium breathable bamboo baby shoes with superior comfort and durability. Perfect for active toddlers.",
-        features: [
-            "Premium breathable bamboo fabric for ultimate comfort",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care",
-            "Recommended for ages 6 months to 4 years"
-        ],
-        details: {
-            material: "60% Bamboo, 30% Cotton, 10% Elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "RESTOCK ALERT"]
-    },
-    "see-through-bear-beige": {
-        name: "Attipas Zootopia Bear Beige",
-        slug: "see-through-bear-beige",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.6,
-        reviewCount: 112,
-        description: "Adorable bear design in beige with see-through elements. Perfect for little ones who love cute animal themes.",
-        features: [
-            "Cute bear design with see-through elements",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["SHOE-SOCKS"]
-    },
-    "zootopia-penguin-navy": {
-        name: "Attipas Zootopia Penguin Navy",
-        slug: "zootopia-penguin-navy",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.8,
-        reviewCount: 134,
-        description: "Adorable penguin design in navy blue. Part of our Zootopia collection featuring cute animal themes.",
-        features: [
-            "Cute penguin design from Zootopia collection",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["SHOE-SOCKS"]
-    },
-    "heart-pink": {
-        name: "Heart - Pink",
-        slug: "heart-pink",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.7,
-        reviewCount: 98,
-        description: "Adorable heart-themed baby shoes in pink. Perfect for little ones who love sweet designs.",
-        features: [
-            "Cute heart design in pink",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["20% OFF"]
-    },
-    "attipas-bong-bong-pink": {
-        name: "Attipas Bong Bong - Pink",
-        slug: "attipas-bong-bong-pink",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.6,
-        reviewCount: 87,
-        description: "Fun and playful Bong Bong design in pink. Perfect for active toddlers who love to bounce around.",
-        features: [
-            "Playful Bong Bong design",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["SALE"]
-    },
-    "palette-berry": {
-        name: "Palette - Berry",
-        slug: "palette-berry",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.8,
-        reviewCount: 112,
-        description: "Beautiful berry color from our Palette collection. Rich and vibrant design for stylish little ones.",
-        features: [
-            "Beautiful berry color from Palette collection",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["20% OFF"]
-    },
-    "zootopia-bear-beige": {
-        name: "Zootopia Bear - Beige",
-        slug: "zootopia-bear-beige",
-        price: 25.00,
-        salePrice: null,
-        rating: 4.5,
-        reviewCount: 76,
-        description: "Adorable bear design in beige from our Zootopia collection. Coming soon with exciting new features.",
-        features: [
-            "Cute bear design from Zootopia collection",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["20% OFF", "COMING SOON"]
-    },
-    "palette-white-chocolate": {
-        name: "Palette - White Chocolate",
-        slug: "palette-white-chocolate",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.7,
-        reviewCount: 94,
-        description: "Elegant white chocolate color from our Palette collection. Sophisticated and timeless design.",
-        features: [
-            "Elegant white chocolate color from Palette collection",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["20% OFF"]
-    },
-    "star-charcoal": {
-        name: "Star - Charcoal",
-        slug: "star-charcoal",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.9,
-        reviewCount: 145,
-        description: "Stylish star pattern in charcoal color. Perfect for little stars who love to shine.",
-        features: [
-            "Stylish star pattern in charcoal",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "20% OFF"]
-    },
-    "attipas-flower-gray": {
-        name: "Attipas Flower - Gray",
-        slug: "attipas-flower-gray",
-        price: 31.00,
-        salePrice: 25.00,
-        rating: 4.6,
-        reviewCount: 103,
-        description: "Beautiful flower design in gray. Elegant and sophisticated for stylish little ones.",
-        features: [
-            "Beautiful flower design in gray",
-            "Made with soft, breathable materials",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight sock-shoe hybrid design",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Cotton blend with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "20% OFF"]
-    },
-    "first-walking-shoes-breathable-mesh-solid-grey": {
-        name: "First Walking Shoes - Breathable Mesh (Solid Grey)",
-        slug: "first-walking-shoes-breathable-mesh-solid-grey",
-        price: 44.00,
-        salePrice: 35.00,
-        rating: 4.8,
-        reviewCount: 167,
-        description: "Premium breathable mesh in solid grey. Perfect for first steps with superior comfort and support.",
-        features: [
-            "Premium breathable mesh material",
-            "Solid grey color for versatile styling",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight design for natural movement",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Breathable mesh with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "20% OFF"]
-    },
-    "first-walking-shoes-breathable-mesh-solid-pink": {
-        name: "First Walking Shoes - Breathable Mesh (Solid Pink)",
-        slug: "first-walking-shoes-breathable-mesh-solid-pink",
-        price: 44.00,
-        salePrice: 35.00,
-        rating: 4.7,
-        reviewCount: 134,
-        description: "Premium breathable mesh in solid pink. Perfect for first steps with superior comfort and support.",
-        features: [
-            "Premium breathable mesh material",
-            "Solid pink color for stylish little ones",
-            "Flexible, non-slip rubber sole for safe first steps",
-            "Lightweight design for natural movement",
-            "Easy slip-on design - stays on baby's feet",
-            "Machine washable for easy care"
-        ],
-        details: {
-            material: "Breathable mesh with elastane",
-            sole: "Natural Rubber",
-            care: "Machine washable at 30°C",
-            origin: "Made in Korea"
-        },
-        sizes: [
-            { label: "XS (10.5cm)", value: "xs", ageRange: "6-12 months" },
-            { label: "S (11.5cm)", value: "s", ageRange: "12-18 months" },
-            { label: "M (12.5cm)", value: "m", ageRange: "18-24 months" },
-            { label: "L (13.5cm)", value: "l", ageRange: "24-30 months" },
-            { label: "XL (14.5cm)", value: "xl", ageRange: "30+ months" }
-        ],
-        images: [
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-2.webp`,
-            `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-3.webp`
-        ],
-        badges: ["BESTSELLER", "20% OFF"]
+        // Extract just the mm measurement for age range mapping
+        const mmMatch = sizeLabel.match(/(\d+)㎜/);
+        const mmSize = mmMatch ? parseInt(mmMatch[1]) : 0;
+
+        // Map sizes to age ranges based on mm measurement
+        let ageRange = '6+ months';
+        if (mmSize <= 115) {
+            ageRange = '6-12 months';
+        } else if (mmSize <= 125) {
+            ageRange = '12-18 months';
+        } else if (mmSize <= 135) {
+            ageRange = '18-24 months';
+        } else if (mmSize <= 145) {
+            ageRange = '24-30 months';
+        } else {
+            ageRange = '30+ months';
+        }
+
+        return {
+            id: variant.id,
+            label: sizeLabel,
+            value: sizeLabel, // Use size label as value for matching
+            ageRange,
+            available: variant.availableForSale && variant.quantityAvailable > 0,
+            quantityAvailable: variant.quantityAvailable
+        };
+    });
+
+    // Extract features from description or use default ones
+    const features = [
+        "Innovative shoe-sock design for natural walking development",
+        "Mimics barefoot walking sensation",
+        "Allows toes to move freely for better balance",
+        "Easy slip-on design like a sock",
+        "Machine washable and durable",
+        "Ergonomic design supports healthy foot development"
+    ];
+
+    // Generate badges from tags
+    const badges: string[] = [];
+    if (shopifyProduct.tags.includes('bestseller') || shopifyProduct.tags.includes('Bestseller')) {
+        badges.push('BESTSELLER');
     }
+    if (onSale) {
+        badges.push('SALE');
+    }
+    if (shopifyProduct.tags.includes('new') || shopifyProduct.tags.includes('New')) {
+        badges.push('NEW');
+    }
+
+    return {
+        name: shopifyProduct.title,
+        slug: shopifyProduct.handle,
+        price: originalPrice || salePrice,
+        salePrice: onSale ? salePrice : null,
+        rating: 4.8, // Default rating - you can implement a review system later
+        reviewCount: 127, // Default review count
+        description: shopifyProduct.description || "Premium baby shoes designed for comfort and safety.",
+        features,
+        details: {
+            material: "Premium materials", // You can get this from metafields later
+            sole: "Natural Rubber",
+            care: "Machine washable at 30°C",
+            origin: "Made in Korea"
+        },
+        sizes,
+        images: images.length > 0 ? images : [`${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`],
+        badges,
+        shopifyProduct // Keep reference to original Shopify product
+    };
 };
 
-// Related products
-const RELATED_PRODUCTS = [
-    {
-        slug: "pop-peach",
-        name: "Breathable Bamboo - Pop Peach",
-        price: 31.00,
-        image: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`
-    },
-    {
-        slug: "aqua-shoes-sun-yellow",
-        name: "Breathable Bamboo - Sun Yellow",
-        price: 31.00,
-        image: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`
-    },
-    {
-        slug: "attipas-endangered-koala-gray",
-        name: "Attipas Koala - Grey",
-        price: 31.00,
-        image: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`
-    }
-];
+interface ProductPageProps {
+    params: {
+        slug: string;
+    };
+}
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-    const product = PRODUCT_DATA[params.slug];
-    const { addItem } = useCart();
-    const { convertPrice, currencySymbol } = useCurrency();
+export default function ProductPage({ params }: ProductPageProps) {
+    const [slug, setSlug] = useState<string>("");
 
+    // Handle async params
+    useEffect(() => {
+        const getSlug = async () => {
+            const resolvedParams = await params;
+            setSlug(resolvedParams.slug);
+        };
+        getSlug();
+    }, [params]);
+    const [product, setProduct] = useState<ReturnType<typeof transformShopifyProduct> | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Product interaction state
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [showSizeError, setShowSizeError] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
-    const [imageZoom, setImageZoom] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [selectedVariantStock, setSelectedVariantStock] = useState<number | null>(null);
+    const [isSelectedVariantAvailable, setIsSelectedVariantAvailable] = useState(true);
+    // const [imageZoom, setImageZoom] = useState(false); // Removed unused state
 
-    // If product not found, show 404-like message
-    if (!product) {
+    const { addItem } = useShopifyCart();
+    const { convertPrice, currencySymbol } = useCurrency();
+
+    // Fetch product from Shopify
+    useEffect(() => {
+        if (!slug) return; // Don't fetch until slug is available
+
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const shopifyProduct = await getProductByHandle(slug);
+
+                if (!shopifyProduct) {
+                    notFound();
+                    return;
+                }
+
+                const transformedProduct = transformShopifyProduct(shopifyProduct);
+                setProduct(transformedProduct);
+            } catch (err) {
+                console.error('Error fetching product:', err);
+                setError('Failed to load product. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [slug]);
+
+    // Update availability when selected size changes
+    useEffect(() => {
+        if (!product || !selectedSize) {
+            setSelectedVariantStock(null);
+            setIsSelectedVariantAvailable(true);
+            return;
+        }
+
+        // Find the selected variant based on size
+        const selectedVariant = product.shopifyProduct.variants.edges.find(edge =>
+            edge.node.selectedOptions.some(option =>
+                option.name.toLowerCase() === 'size' && option.value === selectedSize
+            )
+        );
+
+        if (selectedVariant) {
+            const variant = selectedVariant.node;
+            setSelectedVariantStock(variant.quantityAvailable);
+            setIsSelectedVariantAvailable(variant.availableForSale && variant.quantityAvailable > 0);
+        } else {
+            setSelectedVariantStock(null);
+            setIsSelectedVariantAvailable(false);
+        }
+    }, [product, selectedSize]);
+
+    // Loading state
+    if (loading) {
         return (
             <div className="min-h-screen bg-background-white">
                 <Nav />
-                <div className="container mx-auto px-4 py-20 text-center">
-                    <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
-                    <p className="text-muted-foreground mb-8">The product you&apos;re looking for doesn&apos; exist.</p>
-                    <Link href="/" className="text-accent-pink hover:underline">
-                        Return to Home
-                    </Link>
+                <div className="flex items-center justify-center py-20">
+                    <div className="text-center">
+                        <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-accent-blue-grey" />
+                        <h3 className="text-xl font-semibold text-text-primary mb-2">Loading Product</h3>
+                        <p className="text-text-secondary">Fetching product details...</p>
+                    </div>
                 </div>
                 <Footer />
             </div>
         );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-background-white">
+                <Nav />
+                <div className="container mx-auto px-4 py-20">
+                    <div className="text-center py-20 bg-background-light-grey-alt rounded-xl">
+                        <div className="max-w-md mx-auto">
+                            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Eye className="w-10 h-10 text-red-500" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-text-primary mb-3">
+                                Failed to Load Product
+                            </h3>
+                            <p className="text-text-secondary mb-6">
+                                {error}
+                            </p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-8 py-3 bg-accent-blue-grey text-white rounded-lg hover:bg-accent-blue-grey-dark transition-colors font-semibold shadow-sm hover:shadow-md"
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    if (!product) {
+        notFound();
+        return null;
     }
 
     const displayPrice = convertPrice(product.price);
@@ -714,378 +258,318 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         : null;
     const finalPrice = displaySalePrice || displayPrice;
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!selectedSize) {
             setShowSizeError(true);
             return;
         }
 
-        const selectedSizeData = product.sizes.find(s => s.value === selectedSize);
-
-        // Add the item to cart (quantity is handled automatically by addItem)
-        for (let i = 0; i < quantity; i++) {
-            addItem({
-                id: `${product.slug}-${selectedSize}`,
-                name: `${product.name} - ${selectedSizeData?.label}`,
-                price: product.price.toFixed(2),
-                salePrice: product.salePrice ? product.salePrice.toFixed(2) : null,
-                imageSrc: product.images[0]
-            });
+        if (!product?.shopifyProduct) {
+            console.error("No Shopify product data available");
+            return;
         }
 
-        setShowSizeError(false);
-    };
+        // Check if selected variant is available
+        if (!isSelectedVariantAvailable) {
+            console.error("Selected variant is out of stock");
+            return;
+        }
 
-    const incrementQuantity = () => setQuantity(q => q + 1);
-    const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1));
+        // Check if requested quantity is available
+        if (selectedVariantStock !== null && quantity > selectedVariantStock) {
+            console.error(`Only ${selectedVariantStock} items available in stock`);
+            return;
+        }
 
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: product.name,
-                    text: product.description,
-                    url: window.location.href,
-                });
-            } catch {
-                console.log('Share cancelled');
+        setIsAddingToCart(true);
+
+        try {
+            // Find the selected variant from Shopify product data
+            const selectedVariant = product.shopifyProduct.variants.edges.find(
+                edge => edge.node.selectedOptions.some(
+                    option => option.name === "Size" && option.value === selectedSize
+                )
+            );
+
+            if (!selectedVariant) {
+                throw new Error("Selected variant not found");
             }
-        } else {
-            // Fallback: copy to clipboard
-            navigator.clipboard.writeText(window.location.href);
-            alert('Link copied to clipboard!');
+
+            // Use Shopify cart context to add item
+            await addItem(selectedVariant.node.id, quantity);
+
+            setShowSizeError(false);
+            console.log("Successfully added to Shopify cart");
+
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+            setShowSizeError(false);
+        } finally {
+            setIsAddingToCart(false);
         }
     };
-
-    // Get related products excluding current product
-    const relatedProducts = RELATED_PRODUCTS.filter(p => p.slug !== product.slug).slice(0, 4);
 
     return (
         <div className="min-h-screen bg-background-white">
             <Nav />
 
             {/* Breadcrumb */}
-            <div className="container mx-auto px-4 py-4 border-b border-gray-100">
-                <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Link href="/" className="hover:text-accent-blue-grey transition-colors">Home</Link>
+            <div className="container mx-auto px-4 py-4">
+                <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Link href="/" className="hover:text-text-primary">Home</Link>
                     <ChevronRight className="w-4 h-4" />
-                    <Link href="/collections/all-products" className="hover:text-accent-blue-grey transition-colors">Products</Link>
+                    <Link href="/collections/all-products" className="hover:text-text-primary">Products</Link>
                     <ChevronRight className="w-4 h-4" />
-                    <span className="text-foreground font-medium">{product.name}</span>
+                    <span className="text-text-primary">{product.name}</span>
                 </nav>
             </div>
 
-            {/* Product Details */}
-            <div className="container mx-auto px-4 py-8 md:py-12">
-                <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
-                    {/* Left Column - Images */}
-                    <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+            <div className="container mx-auto px-4 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {/* Product Images */}
+                    <div className="space-y-4">
                         {/* Main Image */}
-                        <div className="relative aspect-square bg-background-light-grey rounded-2xl overflow-hidden group">
+                        <div className="relative aspect-square bg-background-light-grey-alt rounded-xl overflow-hidden">
                             <Image
                                 src={product.images[selectedImage]}
                                 alt={product.name}
                                 fill
-                                className={`object-cover transition-transform duration-500 ${imageZoom ? 'scale-150' : 'scale-100'}`}
+                                className="object-cover"
                                 priority
                             />
-
-                            {/* Badges */}
-                            <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                                {product.badges.map((badge: string, index: number) => (
-                                    <span
-                                        key={index}
-                                        className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-md ${badge === "BESTSELLER"
-                                            ? "bg-black text-white"
-                                            : "bg-accent-pink text-white"
-                                            }`}
-                                    >
-                                        {badge}
-                                    </span>
-                                ))}
-                            </div>
-
-                            {/* Actions */}
-                            <div className="absolute top-4 right-4 flex gap-2 z-10">
-                                <button
-                                    onClick={handleShare}
-                                    className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-md transition-all hover:scale-110"
-                                    title="Share product"
-                                >
-                                    <Share2 className="w-4 h-4 text-gray-700" />
-                                </button>
-                                <button
-                                    onClick={() => setIsFavorite(!isFavorite)}
-                                    className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-md transition-all hover:scale-110"
-                                    title="Add to wishlist"
-                                >
-                                    <Heart className={`w-4 h-4 transition-colors ${isFavorite ? 'fill-accent-pink text-accent-pink' : 'text-gray-700'}`} />
-                                </button>
-                            </div>
-
-                            {/* Zoom Button */}
-                            <button
-                                onClick={() => setImageZoom(!imageZoom)}
-                                className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-md z-10"
-                                title={imageZoom ? "Zoom out" : "Zoom in"}
-                            >
-                                <ZoomIn className="w-4 h-4 text-gray-700" />
-                            </button>
+                            {product.badges.length > 0 && (
+                                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                                    {product.badges.map((badge) => (
+                                        <span
+                                            key={badge}
+                                            className={`px-3 py-1 text-xs font-bold rounded-full ${badge === 'BESTSELLER' ? 'bg-accent-pink text-white' :
+                                                badge === 'SALE' ? 'bg-red-500 text-white' :
+                                                    'bg-accent-blue-grey text-white'
+                                                }`}
+                                        >
+                                            {badge}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Thumbnail Images */}
-                        <div className="grid grid-cols-4 gap-3">
-                            {product.images.map((image: string, index: number) => (
-                                <button
-                                    key={index}
-                                    onClick={() => {
-                                        setSelectedImage(index);
-                                        setImageZoom(false);
-                                    }}
-                                    className={`aspect-square relative bg-background-light-grey rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                                        ? "border-accent-blue-grey ring-2 ring-accent-blue-grey/20"
-                                        : "border-transparent hover:border-gray-300"
-                                        }`}
-                                >
-                                    <Image
-                                        src={image}
-                                        alt={`${product.name} view ${index + 1}`}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </button>
-                            ))}
-                        </div>
+                        {product.images.length > 1 && (
+                            <div className="flex space-x-2 overflow-x-auto">
+                                {product.images.map((image, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedImage(index)}
+                                        className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 ${selectedImage === index ? 'ring-2 ring-accent-pink' : ''
+                                            }`}
+                                    >
+                                        <Image
+                                            src={image}
+                                            alt={`${product.name} ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Right Column - Product Info */}
+                    {/* Product Info */}
                     <div className="space-y-6">
                         <div>
-                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3 leading-tight">
-                                {product.name}
-                            </h1>
-
-                            {/* Rating */}
-                            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
-                                <div className="flex items-center gap-1">
+                            <h1 className="text-3xl font-bold text-text-primary mb-2">{product.name}</h1>
+                            {/* <div className="flex items-center space-x-4 mb-4">
+                                <div className="flex items-center">
                                     {[...Array(5)].map((_, i) => (
                                         <Star
                                             key={i}
-                                            className={`w-5 h-5 ${i < Math.floor(product.rating)
-                                                ? "fill-star-yellow text-star-yellow"
-                                                : "text-gray-300"
+                                            className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
                                                 }`}
                                         />
                                     ))}
+                                    <span className="ml-2 text-sm text-muted-foreground">
+                                        {product.rating} ({product.reviewCount} reviews)
+                                    </span>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                    <span className="font-semibold text-text-primary">{product.rating}</span> ({product.reviewCount} reviews)
-                                </span>
-                            </div>
+                            </div> */}
 
                             {/* Price */}
-                            <div className="mb-6">
-                                {displaySalePrice ? (
-                                    <div className="flex items-center gap-4 flex-wrap">
-                                        <span className="text-4xl font-bold text-accent-pink">
-                                            {currencySymbol}{displaySalePrice}
-                                        </span>
-                                        <span className="text-2xl text-muted-foreground line-through">
+                            <div className="flex items-center space-x-3 mb-6">
+                                <span className="text-3xl font-bold text-text-primary">
+                                    {currencySymbol}{finalPrice}
+                                </span>
+                                {displaySalePrice && (
+                                    <>
+                                        <span className="text-xl text-muted-foreground line-through">
                                             {currencySymbol}{displayPrice}
                                         </span>
-                                        {savingsPercentage !== null && (
-                                            <span className="text-sm text-white bg-accent-pink font-semibold px-3 py-1.5 rounded-full">
-                                                SAVE {savingsPercentage}%
-                                            </span>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <span className="text-4xl font-bold text-text-primary">
-                                        {currencySymbol}{displayPrice}
-                                    </span>
+                                        <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                                            Save {savingsPercentage}%
+                                        </span>
+                                    </>
                                 )}
-                                <p className="text-sm text-muted-foreground mt-2">Tax included. Shipping calculated at checkout.</p>
                             </div>
+                        </div>
 
-                            {/* Description */}
-                            <p className="text-text-secondary leading-relaxed text-lg mb-6">
-                                {product.description}
-                            </p>
+                        {/* Description */}
+                        <div>
+                            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
                         </div>
 
                         {/* Size Selection */}
-                        <div className="bg-background-light-grey-alt rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <label className="text-sm font-bold text-foreground uppercase tracking-wider">
-                                    Select Size
-                                </label>
-                                <button className="text-sm text-accent-blue-grey hover:text-accent-blue-grey-dark font-medium underline">
-                                    Size Guide
-                                </button>
+                        <div>
+                            <div className="flex items-center justify-between mb-3">
+                                <label className="text-sm font-medium text-text-primary">Size</label>
+                                {showSizeError && (
+                                    <span className="text-sm text-red-600">Please select a size</span>
+                                )}
                             </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {product.sizes.map((size) => (
+                            <div className="grid grid-cols-2 gap-2">
+                                {product.sizes.map((size: ProductSize) => (
                                     <button
-                                        key={size.value}
+                                        key={size.id}
                                         onClick={() => {
                                             setSelectedSize(size.value);
                                             setShowSizeError(false);
                                         }}
-                                        className={`p-4 rounded-xl border-2 transition-all text-left ${selectedSize === size.value
-                                            ? "border-accent-blue-grey bg-accent-blue-grey text-white shadow-md"
-                                            : "border-gray-200 hover:border-accent-blue-grey/50 bg-white"
+                                        disabled={!size.available}
+                                        className={`p-3 text-sm border rounded-lg transition-colors ${selectedSize === size.value
+                                            ? 'border-accent-pink bg-accent-pink text-white'
+                                            : size.available
+                                                ? 'border-gray-300 hover:border-accent-pink'
+                                                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
                                             }`}
                                     >
-                                        <div className="font-bold text-sm">{size.label}</div>
-                                        <div className={`text-xs mt-1 ${selectedSize === size.value ? 'text-white/80' : 'text-muted-foreground'}`}>
-                                            {size.ageRange}
-                                        </div>
+                                        <div className="font-medium">{size.label}</div>
+                                        <div className="text-xs opacity-75">{size.ageRange}</div>
+                                        {!size.available ? (
+                                            <div className="text-xs text-red-500">Out of Stock</div>
+                                        ) : size.quantityAvailable <= 3 ? (
+                                            <div className="text-xs text-orange-500">Only {size.quantityAvailable} left</div>
+                                        ) : null}
                                     </button>
                                 ))}
                             </div>
-
-                            {showSizeError && (
-                                <p className="text-sm text-red-600 mt-3 font-medium">⚠ Please select a size</p>
-                            )}
                         </div>
 
                         {/* Quantity */}
                         <div>
-                            <label className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 block">
-                                Quantity
-                            </label>
-                            <div className="flex items-center gap-6">
-                                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                                    <button
-                                        onClick={decrementQuantity}
-                                        className="p-4 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <Minus className="w-4 h-4" />
-                                    </button>
-                                    <span className="px-8 font-bold text-lg">{quantity}</span>
-                                    <button
-                                        onClick={incrementQuantity}
-                                        className="p-4 hover:bg-gray-100 transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <span className="text-muted-foreground">
-                                        In stock - ships within 1-2 business days
-                                    </span>
-                                </div>
+                            <label className="text-sm font-medium text-text-primary mb-3 block">Quantity</label>
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                                >
+                                    <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="w-12 text-center font-medium">{quantity}</span>
+                                <button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    disabled={selectedVariantStock !== null && quantity >= selectedVariantStock}
+                                    className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
 
-                        {/* Add to Cart Button */}
-                        <button
-                            onClick={handleAddToCart}
-                            className="w-full bg-accent-blue-grey text-white py-5 px-8 rounded-xl font-bold uppercase text-base tracking-wider hover:bg-accent-blue-grey-dark transition-all shadow-lg hover:shadow-xl transform active:scale-95"
-                        >
-                            Add to Cart - {currencySymbol}{(parseFloat(finalPrice) * quantity).toFixed(2)}
-                        </button>
+                        {/* Stock Status */}
+                        {selectedSize && (
+                            <div className="mb-4">
+                                {isSelectedVariantAvailable ? (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span className="text-green-600 font-medium">
+
+                                            {selectedVariantStock !== null && selectedVariantStock <= 50
+                                                ? `Only ${selectedVariantStock} left in stock`
+                                                : 'In Stock'
+                                            }
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                        <span className="text-red-600 font-medium">Out of Stock</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Add to Cart */}
+                        <div className="space-y-4">
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={isAddingToCart || !isSelectedVariantAvailable || !selectedSize || (selectedVariantStock !== null && quantity > selectedVariantStock)}
+                                className={`w-full py-4 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${!isSelectedVariantAvailable || !selectedSize
+                                    ? 'bg-gray-400 text-white'
+                                    : 'bg-accent-pink text-white hover:bg-accent-pink-dark'
+                                    }`}
+                            >
+                                {isAddingToCart ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Adding to Cart...
+                                    </>
+                                ) : !selectedSize ? (
+                                    'Select Size First'
+                                ) : !isSelectedVariantAvailable ? (
+                                    'Out of Stock'
+                                ) : selectedVariantStock !== null && quantity > selectedVariantStock ? (
+                                    `Only ${selectedVariantStock} Available`
+                                ) : (
+                                    'Add to Cart'
+                                )}
+                            </button>
+
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setIsFavorite(!isFavorite)}
+                                    className={`flex-1 border border-gray-300 py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${isFavorite ? 'bg-red-50 border-red-300 text-red-600' : 'hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                                    <span>Wishlist</span>
+                                </button>
+                                <button className="flex-1 border border-gray-300 py-3 px-4 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-50">
+                                    <Share2 className="w-5 h-5" />
+                                    <span>Share</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Features */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-text-primary mb-4">Key Features</h3>
+                            <ul className="space-y-2">
+                                {product.features.map((feature, index) => (
+                                    <li key={index} className="flex items-start space-x-3">
+                                        <div className="w-2 h-2 bg-accent-pink rounded-full mt-2 flex-shrink-0" />
+                                        <span className="text-muted-foreground">{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
                         {/* Trust Badges */}
-                        <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
-                            <div className="text-center p-4 bg-background-light-grey-alt rounded-xl">
-                                <Truck className="w-7 h-7 mx-auto mb-2 text-accent-blue-grey" />
-                                <p className="text-xs font-bold mb-1">Free Shipping</p>
-                                <p className="text-xs text-muted-foreground">Over $50</p>
+                        <div className="grid grid-cols-3 gap-4 pt-6 border-t">
+                            <div className="text-center">
+                                <ShieldCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                                <div className="text-sm font-medium">Safe Materials</div>
                             </div>
-                            <div className="text-center p-4 bg-background-light-grey-alt rounded-xl">
-                                <RefreshCcw className="w-7 h-7 mx-auto mb-2 text-accent-blue-grey" />
-                                <p className="text-xs font-bold mb-1">Easy Returns</p>
-                                <p className="text-xs text-muted-foreground">30 Days</p>
+                            <div className="text-center">
+                                <Truck className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                                <div className="text-sm font-medium">Free Shipping</div>
                             </div>
-                            <div className="text-center p-4 bg-background-light-grey-alt rounded-xl">
-                                <ShieldCheck className="w-7 h-7 mx-auto mb-2 text-accent-blue-grey" />
-                                <p className="text-xs font-bold mb-1">Secure Payment</p>
-                                <p className="text-xs text-muted-foreground">SSL Protected</p>
+                            <div className="text-center">
+                                <RefreshCcw className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                                <div className="text-sm font-medium">Easy Returns</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* Product Details Section */}
-                <div className="mt-20 grid md:grid-cols-2 gap-12 py-12 border-t border-gray-100">
-                    {/* Features */}
-                    <div className="bg-background-light-grey-alt rounded-2xl p-8">
-                        <h3 className="text-2xl font-bold mb-6 uppercase tracking-wide flex items-center gap-2">
-                            <span className="w-1 h-8 bg-accent-pink rounded-full"></span>
-                            Key Features
-                        </h3>
-                        <ul className="space-y-4">
-                            {product.features.map((feature: string, index: number) => (
-                                <li key={index} className="flex items-start gap-3">
-                                    <span className="text-accent-pink mt-1 text-xl">✓</span>
-                                    <span className="text-text-secondary">{feature}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="bg-background-light-grey-alt rounded-2xl p-8">
-                        <h3 className="text-2xl font-bold mb-6 uppercase tracking-wide flex items-center gap-2">
-                            <span className="w-1 h-8 bg-accent-blue-grey rounded-full"></span>
-                            Product Details
-                        </h3>
-                        <dl className="space-y-4">
-                            {Object.entries(product.details).map(([key, value]) => (
-                                <div key={key} className="flex justify-between border-b border-gray-200 pb-3">
-                                    <dt className="font-bold text-text-primary capitalize">{key}:</dt>
-                                    <dd className="text-text-secondary text-right">{value as string}</dd>
-                                </div>
-                            ))}
-                        </dl>
-                    </div>
-                </div>
-
-                {/* Related Products */}
-                {relatedProducts.length > 0 && (
-                    <div className="mt-20 pt-12 border-t border-gray-100">
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-3 uppercase tracking-wide text-text-primary">
-                                You May Also Like
-                            </h2>
-                            <p className="text-text-secondary text-lg">
-                                Discover more from our collection
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            {relatedProducts.map((related) => {
-                                const relatedPrice = convertPrice(related.price);
-                                return (
-                                    <Link
-                                        key={related.slug}
-                                        href={`/products/${related.slug}`}
-                                        className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-gray-100"
-                                    >
-                                        <div className="relative aspect-square bg-background-light-grey overflow-hidden">
-                                            <Image
-                                                src={related.image}
-                                                alt={related.name}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                        </div>
-                                        <div className="p-4">
-                                            <h3 className="text-sm font-semibold mb-2 line-clamp-2 text-text-primary group-hover:text-accent-blue-grey transition-colors">
-                                                {related.name}
-                                            </h3>
-                                            <p className="text-lg font-bold text-text-primary">
-                                                {currencySymbol}{relatedPrice}
-                                            </p>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
             </div>
 
             <Footer />

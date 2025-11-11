@@ -114,6 +114,10 @@ const products: Product[] = [
   },
 ];
 
+
+//get product by collection names 
+
+
 const MidSeasonSaleGrid = () => {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({});
@@ -152,6 +156,7 @@ const MidSeasonSaleGrid = () => {
           Big Summer Sale - UPTO 20% OFF
         </h2>
         <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+          
           {products.map((product) => (
             <ProductCard
               key={product.id}

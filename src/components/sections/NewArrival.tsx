@@ -39,7 +39,7 @@ const NewArrivalSection = () => {
                         The Barefoot Concept Range Expert-recommended for steps that mimic natural walking
                     </p>
                     <Button asChild size="lg" className="mt-8 px-9 uppercase bg-[#d68972] hover:bg-[#d68972]/80">
-                        <Link href="/collections/all-products">Shop New Arrival</Link>
+                        <Link href="/collections/new-collection">Shop New Arrival</Link>
                     </Button>
                 </motion.div>
             </div>

@@ -1,6 +1,6 @@
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import ShopProductsGrid from "@/components/sections/ProductGrid";
+import ShopProductsGrid from "@/components/ProductGrid";
 import Link from "next/link";
 
 export default function AllProductsPage() {

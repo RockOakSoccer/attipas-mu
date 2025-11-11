@@ -1,6 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import React from "react";
+import Link from "next/link";
 
 const RotatingSaleBadge = () => {
     return (
@@ -24,7 +26,8 @@ const RotatingSaleBadge = () => {
                     />
                     <text className="text-[11px] sm:text-[12px] font-medium fill-white uppercase tracking-wider">
                         <textPath href="#circlePath" startOffset="0%">
-                            • Summer Sale • Summer Sale • Summer Sale • Summer Sale
+                            {/* • Summer Sale • Summer Sale • Summer Sale • Summer Sale */}
+                            • New Collection • New Collection • New Collection •
                         </textPath>
                     </text>
                 </svg>
@@ -32,10 +35,10 @@ const RotatingSaleBadge = () => {
 
             {/* Inner static circle with sale percentage */}
             <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#d68972] to-[#d68972] flex flex-col items-center justify-center shadow-lg">
-                    <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-none">30%</span>
-                    <span className="text-xs sm:text-sm font-semibold text-white mt-1 tracking-wide">OFF SALE</span>
-                </div>
+                <Link href="/collections/all-products" className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#d68972] to-[#d68972] flex flex-col items-center justify-center shadow-lg hover:cursor-pointer decoration-none">
+                    <span className="text-2xl sm:text-2xl md:text-3xl font-bold text-white leading-none">Shop</span>
+                    <span className="text-xs sm:text-sm font-semibold text-white mt-1 tracking-wide">Now</span>
+                </Link>
             </div>
         </div>
     );

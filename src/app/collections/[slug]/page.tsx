@@ -1,77 +1,40 @@
+
+
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import ShopProductsGrid from "@/components/sections/ProductGrid";
+import ShopProductsGrid from "@/components/ProductGrid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
+import { getAllCollections } from "@/lib/shopify";
+//fetch products by handle for each product
 // Collection configuration
-const COLLECTIONS = {
-    "all-products": {
-        title: "All Products",
-        description: "Discover our complete collection of baby shoes",
-        category: "All"
-    },
-    "summer-baby-shoes": {
-        title: "Summer Baby Shoes",
-        description: "Lightweight and breathable shoes for summer",
-        category: "Summer"
-    },
-    "winter-shoes": {
-        title: "Winter Baby Shoes",
-        description: "Warm and cozy shoes for winter months",
-        category: "Winter"
-    },
-    "kids-mesh-shoes": {
-        title: "Mesh Baby Shoes",
-        description: "Breathable mesh shoes for active toddlers",
-        category: "Mesh"
-    },
-    "bamboo-baby-shoes": {
-        title: "Bamboo Baby Shoes",
-        description: "Eco-friendly bamboo fiber baby shoes",
-        category: "Bamboo"
-    },
-    "aqua-shoes": {
-        title: "Aqua Baby Shoes",
-        description: "Water-resistant shoes for beach and pool",
-        category: "Aqua"
-    },
-    "animal-baby-shoes": {
-        title: "Animal Baby Shoes",
-        description: "Fun animal-themed designs for little ones",
-        category: "Animal"
-    },
-    "gift-packs": {
-        title: "New Baby Gifts",
-        description: "Perfect gift sets for new parents",
-        category: "Gifts"
-    },
-    "knee-pads": {
-        title: "Crawling Knee Pads",
-        description: "Protective knee pads for crawling babies",
-        category: "Accessories"
-    },
-    "baby-socks": {
-        title: "Non Slip Baby Socks",
-        description: "Safe non-slip socks for early walkers",
-        category: "Socks"
-    },
-    "larger-sizes": {
-        title: "Larger Baby Shoes (US 7.5-8.5)",
-        description: "Extended sizes for growing toddlers",
-        category: "Large"
-    },
-    "silicone-baby-feeding-set": {
-        title: "Baby Feeding & Teething",
-        description: "Safe silicone feeding and teething products",
-        category: "Feeding"
-    },
-    "on-sale-items": {
-        title: "Sale Items",
-        description: "Great deals on baby shoes and accessories",
-        category: "Sale"
-    }
-} as const;
+
+
+const allCollections = await getAllCollections();
+
+// console.log('this is all collection', allCollections)
+
+//change the collections into objects with handles as its values
+const COLLECTIONS = allCollections.reduce((acc, collection) => {
+    acc[collection.handle] = {
+        title: collection.title,
+        description: collection.description,
+        category: collection.handle
+    };
+    return acc;
+}, {} as Record<string, { title: string; description: string; category: string }>)
+
+// console.log('this is formatted collection', formattedCollections)
+// const COLLECTIONS = {
+//     "all-products": {
+//         title: "All Products",
+//         description: "Discover our complete collection of baby shoes",
+//         category: "All"
+//     },
+// } as const;
+
+// console.log('this is collection', COLLECTIONS)
+// console.log(typeof COLLECTIONS)
 
 type CollectionSlug = keyof typeof COLLECTIONS;
 
@@ -83,6 +46,7 @@ interface CollectionPageProps {
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
     const { slug } = await params;
+    // console.log('this is slug', slug)
 
     // Check if the collection exists
     if (!(slug in COLLECTIONS)) {
@@ -90,7 +54,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     }
 
     const collection = COLLECTIONS[slug as CollectionSlug];
-
+    console.log('this is collection', collection.description)
     return (
         <div className="min-h-screen bg-background-white">
             <Nav />

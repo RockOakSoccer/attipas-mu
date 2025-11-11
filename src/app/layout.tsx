@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 // import VisualEditsMessenger from "../visual-edits/VisualEditsMessenger";
 // import ErrorReporter from "@/components/ErrorReporter";
-import { CartProvider } from "@/contexts/cart-context";
+import { ShopifyCartProvider } from "@/contexts/shopify-cart-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
+import { AuthProvider } from "@/contexts/auth-context";
 
 export const metadata: Metadata = {
   title: "Attipas | MU",
@@ -34,9 +35,11 @@ export default function RootLayout({
           data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
         /> */}
         <CurrencyProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
+          <AuthProvider>
+            <ShopifyCartProvider>
+              {children}
+            </ShopifyCartProvider>
+          </AuthProvider>
         </CurrencyProvider>
         {/* <VisualEditsMessenger /> */}
       </body>

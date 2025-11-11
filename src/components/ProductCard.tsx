@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { useCart } from '@/contexts/cart-context';
+// import { useShopifyCart } from '@/contexts/shopify-cart-context'; // Not used in this component
 import { useCurrency } from '@/contexts/currency-context';
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -65,23 +65,16 @@ export const ProductCard = ({
   showSalePrice = false,
   idPrefix = "product"
 }: ProductCardProps) => {
-  const { addItem } = useCart();
+  // const { addItem } = useShopifyCart(); // Not used in this component
   const { convertPrice, currencySymbol } = useCurrency();
 
   const handleAddToCart = (product: Product) => {
     if (product.isComingSoon) return;
-
-    const price = showSalePrice && product.originalPrice
-      ? product.originalPrice
-      : product.salePrice;
-
-    addItem({
-      id: `${idPrefix}-${product.id}`,
-      name: product.name,
-      price: price.toFixed(2),
-      salePrice: showSalePrice && product.originalPrice ? product.salePrice.toFixed(2) : null,
-      imageSrc: product.imageSrc,
-    });
+    
+    // TODO: Implement Shopify cart integration for ProductCard
+    // For now, redirect to product page where full Shopify integration is available
+    console.log("Add to cart from ProductCard - redirecting to product page");
+    window.location.href = `/products/${product.slug || product.id}`;
   };
 
   const originalPriceConverted = product.originalPrice ? convertPrice(product.originalPrice) : null;
@@ -92,7 +85,7 @@ export const ProductCard = ({
   const displayPrice = showSalePrice ? salePriceConverted : salePriceConverted;
 
   return (
-    <li className="flex flex-col">
+    <li className="flex flex-col bg-background-light-grey-alt rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200 overflow-hidden">
       <Link
         href={`/products/${product.slug}`}
         className="block"
@@ -119,17 +112,17 @@ export const ProductCard = ({
                   width={70}
                   height={19}
                   className="h-auto"
-                  quality={80}
+                  quality={100}
                 />
               );
             })}
           </div>
-          <div className="aspect-square w-full overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1 relative">
+          <div className="aspect-square w-full overflow-hidden relative">
             <Image
               src={product.images[imageIndex]}
               alt={product.name}
-              width={250}
-              height={250}
+              width={500}
+              height={500}
               className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
             {/* Quick View Button */}
@@ -157,7 +150,7 @@ export const ProductCard = ({
       </Link>
 
       {/* Product Info and Add to Cart */}
-      <div className="flex flex-col flex-grow text-center pt-4">
+      <div className="flex flex-col flex-grow text-center p-4">
         <Link href={`/products/${product.slug}`}>
           <h3 className="text-base font-semibold text-text-primary  hover:text-accent-blue-grey transition-colors ">
             {product.name}
