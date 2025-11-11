@@ -292,14 +292,14 @@ const MapSection = () => {
 
                 <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-lg">
                     <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3742.1234567890123!2d57.5034!3d-20.1609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDA5JzM5LjIiUyA1N8KwMzAnMTIuNCJF!5e0!3m2!1sen!2smu!4v1234567890123"
+                        src="https://maps.google.com/maps?width=600&height=400&hl=en&q=10%20Raoul%20Lejeune%20St%2C%20Beau%20Bassin-Rose%20Hill%2C%20Mauritius&t=&z=14&ie=UTF8&iwloc=B&output=embed"
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        title="Attipas Mauritius Store Location"
+                        title="Attipas Mauritius Store Location - 10 Raoul Lejeune St, Beau Bassin-Rose Hill"
                         className="w-full h-full"
                     ></iframe>
                 </div>

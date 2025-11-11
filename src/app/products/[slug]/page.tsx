@@ -361,7 +361,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                                     <button
                                         key={index}
                                         onClick={() => setSelectedImage(index)}
-                                        className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 ${selectedImage === index ? 'ring-2 ring-accent-pink' : ''
+                                        className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 ${selectedImage === index ? 'ring-2 ring-[#d68972]' : ''
                                             }`}
                                     >
                                         <Image
@@ -436,9 +436,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                                         }}
                                         disabled={!size.available}
                                         className={`p-3 text-sm border rounded-lg transition-colors ${selectedSize === size.value
-                                            ? 'border-accent-pink bg-accent-pink text-white'
+                                            ? 'border-[#d68972] bg-[#d68972] text-white'
                                             : size.available
-                                                ? 'border-gray-300 hover:border-accent-pink'
+                                                ? 'border-gray-300 hover:border-[#d68972]'
                                                 : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
                                             }`}
                                     >
@@ -505,7 +505,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                                 disabled={isAddingToCart || !isSelectedVariantAvailable || !selectedSize || (selectedVariantStock !== null && quantity > selectedVariantStock)}
                                 className={`w-full py-4 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${!isSelectedVariantAvailable || !selectedSize
                                     ? 'bg-gray-400 text-white'
-                                    : 'bg-accent-pink text-white hover:bg-accent-pink-dark'
+                                    : 'bg-[#d68972] text-white hover:bg-[#d68972]'
                                     }`}
                             >
                                 {isAddingToCart ? (
@@ -546,7 +546,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                             <ul className="space-y-2">
                                 {product.features.map((feature, index) => (
                                     <li key={index} className="flex items-start space-x-3">
-                                        <div className="w-2 h-2 bg-accent-pink rounded-full mt-2 flex-shrink-0" />
+                                        <div className="w-2 h-2 bg-[#d68972] rounded-full mt-2 flex-shrink-0" />
                                         <span className="text-muted-foreground">{feature}</span>
                                     </li>
                                 ))}
@@ -556,15 +556,15 @@ export default function ProductPage({ params }: ProductPageProps) {
                         {/* Trust Badges */}
                         <div className="grid grid-cols-3 gap-4 pt-6 border-t">
                             <div className="text-center">
-                                <ShieldCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                                <ShieldCheck className="w-8 h-8 text-[#d68972] mx-auto mb-2" />
                                 <div className="text-sm font-medium">Safe Materials</div>
                             </div>
                             <div className="text-center">
-                                <Truck className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                                <Truck className="w-8 h-8 text-[#d68972] mx-auto mb-2" />
                                 <div className="text-sm font-medium">Free Shipping</div>
                             </div>
                             <div className="text-center">
-                                <RefreshCcw className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                                <RefreshCcw className="w-8 h-8 text-[#d68972] mx-auto mb-2" />
                                 <div className="text-sm font-medium">Easy Returns</div>
                             </div>
                         </div>

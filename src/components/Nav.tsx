@@ -65,18 +65,18 @@ const navItems: NavItem[] = [
     label: "Science",
     children: [
       { label: "Seven Point System", href: "/science/seven-point-system" },
-      {
-        label: "Podiatrist Recommendations",
-        href: "/science/podiatrist-recommendations",
-      },
-      {
-        label: "Why to Avoid Fake Shoe-Socks",
-        href: "/science/avoid-fake-shoe-socks",
-      },
-      {
-        label: "Health Expert",
-        href: "/science/health-expert",
-      },
+      // {
+      //   label: "Podiatrist Recommendations",
+      //   href: "/science/podiatrist-recommendations",
+      // },
+      // {
+      //   label: "Why to Avoid Fake Shoe-Socks",
+      //   href: "/science/avoid-fake-shoe-socks",
+      // },
+      // {
+      //   label: "Health Expert",
+      //   href: "/science/health-expert",
+      // },
     ],
   },
   // {
@@ -100,7 +100,7 @@ const navItems: NavItem[] = [
   // { label: "Contact", href: "/contact" },
   { label: "Store Location", href: "/store-location" },
   { label: "FAQ", href: "/faq" },
-  { label: "Sale", href: "/collections/on-sale-items", isSale: true },
+  // { label: "Sale", href: "/collections/on-sale-items", isSale: true },
 ];
 
 
@@ -208,14 +208,14 @@ export default function Nav() {
         <div className="flex flex-1 items-center justify-end space-x-2 lg:space-x-4">
           <div className="hidden lg:flex items-center space-x-2">
             {/* Search Button */}
-            <Button variant="ghost" size="icon" aria-label="Search" className="cursor-pointer">
+            {/* <Button variant="ghost" size="icon" aria-label="Search" className="cursor-pointer">
               <Search className="h-10 w-10 text-text-primary font-bold" />
-            </Button>
+            </Button> */}
             {/* Account Button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              aria-label="Account" 
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Account"
               className="cursor-pointer"
               onClick={() => shopifyAuth.account()}
             >
@@ -226,7 +226,7 @@ export default function Nav() {
               <Button variant="ghost" size="icon" aria-label="Cart" className="relative cursor-pointer">
                 <ShoppingCart className="h-10 w-10 text-text-primary" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-accent-pink text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-[#d68972] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -262,10 +262,10 @@ export default function Nav() {
               </Link>
             </SheetTrigger>
             <SheetTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                aria-label="Account" 
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Account"
                 className="lg:hidden"
                 onClick={() => shopifyAuth.account()}
               >
@@ -278,7 +278,7 @@ export default function Nav() {
                 <Button variant="ghost" size="icon" aria-label="Cart" className="relative lg:hidden">
                   <ShoppingCart className="h-5 w-5 text-text-primary" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-accent-pink text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-[#d68972] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {totalItems}
                     </span>
                   )}

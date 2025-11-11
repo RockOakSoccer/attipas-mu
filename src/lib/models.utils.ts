@@ -72,7 +72,7 @@ export const MODELS_DATA: Record<string, ModelData> = {
     'see-through-bear': {
         name: 'See Through Bear',
         slug: 'see-through-bear',
-        image: `${BASE_URL}/baby-shoe/models/see-through-bear-bamboo/Blue_1.webp`,
+        image: `${BASE_URL}/baby-shoe/models/see-through-bear-bamboo/Blue_7.webp`,
         galleryImages: [
             `${BASE_URL}/baby-shoe/models/see-through-bear-bamboo/Blue_7.webp`,
             `${BASE_URL}/baby-shoe/models/see-through-bear-bamboo/Blue_11.webp`,
@@ -190,7 +190,7 @@ export const MODELS_DATA: Record<string, ModelData> = {
     'baby-crab': {
         name: 'Baby-crab',
         slug: 'baby-crab',
-        image: `${BASE_URL}/baby-shoe/models/baby-crab/A25BC-Baby-crab-4.webp`,
+        image: `${BASE_URL}/baby-shoe/models/baby-crab/A25BC-Baby-crab-2.webp`,
         galleryImages: [
             `${BASE_URL}/baby-shoe/models/baby-crab/A25BS-Baby-crab-4.webp`,
             `${BASE_URL}/baby-shoe/models/baby-crab/A25BS-Baby-crab-2.webp`,

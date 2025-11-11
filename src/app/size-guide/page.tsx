@@ -1,3 +1,4 @@
+'use client'
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Image from "next/image";
@@ -16,14 +17,24 @@ export default function SizeGuidePage() {
                 <section className="bg-background-light-grey py-16 px-6">
                     <div className="container max-w-4xl mx-auto text-center">
                         <h2 className="text-center text-2xl font-bold uppercase text-dark-charcoal-alt mb-4">
-                            Best Seller
+                            Size Guide
                         </h2>
                         <p className="text-lg text-text-secondary max-w-2xl mx-auto">
                             Please use the below size guide when purchasing Attipas toddler shoes or Attipas Kids Mesh Shoes
                         </p>
-                        <Button className="mt-6 bg-accent-blue-grey hover:bg-accent-blue-grey-dark text-white">
+                        <Button
+                            className="mt-6 bg-accent-blue-grey hover:bg-accent-blue-grey-dark text-white"
+                            onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = '/images/foot-sizing.jpg';
+                                link.download = 'Attipas-Size-Guide.jpg';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                        >
                             <Download className="mr-2 h-4 w-4" />
-                            Download Free Size Guide (PDF)
+                            Download Free Size Guide
                         </Button>
                     </div>
                 </section>
@@ -126,7 +137,7 @@ export default function SizeGuidePage() {
                             <div className="flex justify-center">
                                 <div className="relative w-full max-w-md aspect-[3/4] bg-white rounded-lg shadow-lg overflow-hidden">
                                     <Image
-                                        src="https://cdn.shopify.com/s/files/1/0112/7923/7216/files/FootSizingChart-785x1024.png?v=1564489486"
+                                        src="/images/foot-sizing.jpg"
                                         alt="How to measure baby foot size"
                                         fill
                                         className="object-contain p-4"

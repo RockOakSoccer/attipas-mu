@@ -18,7 +18,7 @@ import TopCollections from "@/components/sections/TopCollection";
 import VideoSection from "@/components/sections/VideoSection";
 
 export const metadata: Metadata = {
-  title: "Attipas MU - Premium Baby & Toddler Footwear | Science-Backed Design",
+  title: "Attipas MU - Premium Baby & Toddler Footwear",
   description: "Discover Attipas premium baby and toddler footwear in Mauritius. Science-backed designs for healthy foot development. Shop our collection of breathable, flexible shoes for growing feet.",
   keywords: [
     "Attipas Mauritius",
@@ -30,23 +30,7 @@ export const metadata: Metadata = {
     "healthy foot development",
     "premium baby footwear",
     "Mauritius baby products"
-  ],
-  openGraph: {
-    title: "Attipas MU - Premium Baby & Toddler Footwear",
-    description: "Science-backed baby and toddler shoes designed for healthy foot development. Premium quality footwear in Mauritius.",
-    type: "website",
-    locale: "en_US",
-    siteName: "Attipas MU",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Attipas MU - Premium Baby & Toddler Footwear",
-    description: "Science-backed baby and toddler shoes designed for healthy foot development.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  ]
 };
 
 export default function Page() {

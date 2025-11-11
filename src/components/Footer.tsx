@@ -6,25 +6,25 @@ import Link from "next/link";
 import { SocialIcon } from 'react-social-icons'
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://djunoemhhucuiipi.public.blob.vercel-storage.com';
 const shopLinks = [
-  { name: "Shop", href: "/shop" },
-  { name: 'Best Seller', href: '/bestseller' },
+  { name: "Shop", href: "/collections/all-products" },
+  // { name: 'Best Seller', href: '/bestseller' },
   { name: "Size Guide", href: "/sizing" },
-  { name: "Gallery", href: "/product" },
-  { name: "Science", href: "/science" },
-  { name: "New Arrival", href: "/newarrival" },
+  { name: "Gallery", href: "/models" },
+  { name: "Science", href: "/science/seven-point-system" },
+  { name: "New Arrival", href: "/new-collection" },
   // { name: "Terms of Service", href: "#" },
-  { name: "Sale", href: "/sale" },
+  // { name: "Sale", href: "/sale" },
 ];
 
 const aboutUsLinks = [
   { name: "About Us", href: "/store-location" },
   { name: "Contact", href: "/contact" },
-  { name: "Reviews", href: "#" },
+  // { name: "Reviews", href: "#" },
   // { name: "Recommendations", href: "#" },
-  { name: "Shipping & Returns", href: "#" },
+  // { name: "Shipping & Returns", href: "#" },
   // { name: "Exchanges & Returns", href: "#" },
-  // { name: "Terms and Conditions", href: "#" },
-  { name: "Refund Policy", href: "#" },
+  { name: "Terms and Conditions", href: "/terms-and-conditions" },
+  { name: "Refund Policy", href: "/return-policy" },
   { name: "FAQ", href: "/faq" },
 ];
 
@@ -50,12 +50,13 @@ const Footer = () => {
 
             <div className="mt-8">
               <div className="space-y-1 mt-2 text-base">
-                <p className="text-white">123, Edgecliff Road</p>
+                <p className="text-white">10 Raoul Lejeune Street, 32000</p>
+                <p className="text-white">Beau Bassin-Rose Hill, Mauritius</p>
                 <p className="">
                   <a href="mailto:sales@attipas.mu" className="text-white">sales@attipas.mu</a>
                 </p>
                 <p>
-                  <a href="tel:+61252000000" className="text-white">+61 2 5200 0000</a>
+                  <a href="tel:+23058165618" className="text-white">(+230) 5816 5618</a>
                 </p>
                 <p className="text-white">Attipas | Mauritius</p>
               </div>

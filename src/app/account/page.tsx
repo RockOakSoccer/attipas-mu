@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useEffect, useState } from 'react';
 import { shopifyAuth, getCustomerFromUrl } from '@/lib/shopify-auth';
 import Nav from '@/components/Nav';
@@ -13,7 +14,7 @@ export default function AccountPage() {
   useEffect(() => {
     // Check for URL parameters (verification, reset, etc.)
     const customerInfo = getCustomerFromUrl();
-    
+
     if (customerInfo?.verified) {
       setMessage('Your email has been verified! Redirecting to your account...');
       setMessageType('success');
@@ -52,15 +53,15 @@ export default function AccountPage() {
               )}
               <Loader2 className="w-8 h-8 animate-spin text-gray-500 mx-auto mb-4" />
             </div>
-            
+
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
               Account Access
             </h1>
-            
+
             <p className="text-gray-600 mb-8">
               {message || 'Redirecting to your account...'}
             </p>
-            
+
             <div className="space-y-4">
               <button
                 onClick={handleManualRedirect}
@@ -68,7 +69,7 @@ export default function AccountPage() {
               >
                 Go to Account Now
               </button>
-              
+
               <div className="text-sm text-gray-500">
                 <p>This will redirect you to Shopify&apos;s secure account system where you can:</p>
                 <ul className="mt-2 space-y-1">

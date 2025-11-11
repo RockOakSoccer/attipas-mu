@@ -4,7 +4,7 @@ import "./globals.css";
 // import ErrorReporter from "@/components/ErrorReporter";
 import { ShopifyCartProvider } from "@/contexts/shopify-cart-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
-import { AuthProvider } from "@/contexts/auth-context";
+
 
 export const metadata: Metadata = {
   title: "Attipas | MU",
@@ -35,11 +35,9 @@ export default function RootLayout({
           data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
         /> */}
         <CurrencyProvider>
-          <AuthProvider>
-            <ShopifyCartProvider>
-              {children}
-            </ShopifyCartProvider>
-          </AuthProvider>
+          <ShopifyCartProvider>
+            {children}
+          </ShopifyCartProvider>
         </CurrencyProvider>
         {/* <VisualEditsMessenger /> */}
       </body>

@@ -46,7 +46,7 @@ export default function CartPage() {
     return (
       <div className="min-h-screen bg-white">
         <Nav />
-        <div className="py-8 md:py-16">
+        <div className="py-8 md:py-16 border-2 border-red-900">
           <div className="container mx-auto px-4">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
@@ -79,10 +79,10 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-white">
       <Nav />
-      <div className="py-8 md:py-16">
+      <div className="pb-8 md:pb-16 border-red-900">
         <div className="container mx-auto px-4">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
+          <div className="flex items-center pt-4 gap-2 text-sm text-text-secondary mb-6">
             <Link href="/" className="hover:text-text-primary">Home</Link>
             <ChevronRight size={16} />
             <span className="text-text-primary">Shopping Cart</span>
@@ -164,7 +164,7 @@ export default function CartPage() {
                         <span className="md:hidden text-sm font-medium text-gray-600">Price:</span>
                         {item.price && (
                           <div className="text-sm text-gray-900">
-                            {currencySymbol}{parseFloat(item.price.amount).toFixed(2)}
+                            {currencySymbol} {parseFloat(item.price.amount).toFixed(2)}
                           </div>
                         )}
                       </div>
@@ -218,7 +218,7 @@ export default function CartPage() {
                   <div className="w-80">
                     <div className="flex justify-between py-2">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">{currencySymbol}{parseFloat(totalAmount).toFixed(2)}</span>
+                      <span className="font-medium">{currencySymbol} {parseFloat(totalAmount).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between py-2 text-sm text-gray-500">
                       <span>Tax included. <Link href="/shipping" className="underline">Shipping</Link> calculated at checkout.</span>
@@ -227,7 +227,7 @@ export default function CartPage() {
                     <button
                       onClick={handleCheckout}
                       disabled={!cartId || isLoading}
-                      className="w-full bg-black text-white py-3 px-6 rounded font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mt-4"
+                      className="w-full bg-[#d68972] text-white py-3 px-6 rounded font-medium hover:bg-[#d68972]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mt-4"
                     >
                       {isLoading ? (
                         <>

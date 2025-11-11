@@ -8,28 +8,38 @@ const FAQ = () => {
     const faqs = [
         {
             id: 1,
-            question: "What age range are Attipas baby shoes suitable for?",
-            answer: "Attipas baby shoes are designed for babies and toddlers from 6 months to 4 years old. Our shoes support natural foot development during the crucial early walking stages. We offer various sizes from US 3.5 to US 8.5 to accommodate growing feet and ensure the perfect fit for your little one."
+            question: "Whenshould my babay start wearing Attipas Shoes ",
+            answer: "Typically, babies start standing, crawling and 'cruising' around furniture (walking with the aid of chairs and tables) around the 6-8 month mark, so we recommend wearing Attipas shoes from 6 months of age."
         },
         {
             id: 2,
-            question: "How do I choose the right size for my baby?",
-            answer: "To find the perfect fit, measure your baby's foot length and refer to our detailed size guide. We recommend choosing a size that allows 0.5-1cm of growing room. Our shoes feature flexible materials that adapt to your baby's foot shape. If you're unsure, our customer service team is happy to help you select the right size."
+            question: "What sizes of Attipas shoes should I buy?",
+            answer: "Attipas Baby Shoes come in six sizes (S-XXXL), and Attipas Kids Mesh Shoes come in six sizes (US7-12). We recommend using our easy, printable size guide to measure your baby or child's feet prior to buying Attipas shoes. Refer to our size guide page."
         },
         {
             id: 3,
-            question: "Are Attipas shoes safe for first-time walkers?",
-            answer: "Yes! Attipas shoes are specifically designed for first-time walkers and are recommended by podiatrists. Our shoes feature flexible soles that allow natural foot movement, breathable materials, and anti-slip grips for safety. The lightweight design doesn't interfere with balance development, making them perfect for babies learning to walk."
+            question: "What are the key benefits of Attipas Baby Shoes?",
+            answer: "The five key benefits of wearing Attipas shoes include:\n\n• Convenience: Strong, Smooth, Non-Slip, Machine Washable, Fast-Drying\n• Breathable: Superior, breathable fine holes release heat (International Patent)\n• Big Toe Box: Free toe movement to improve cognitive and motor development\n• Safety: Non use of hazardous materials and adhesives, no use of formaldehyde\n• Lightweight & Flexible: Super lightweight, just like wearing socks!"
         },
         {
             id: 4,
             question: "How do I care for and clean Attipas shoes?",
-            answer: "Attipas shoes are easy to care for. Most styles are machine washable on a gentle cycle with cold water. For best results, air dry away from direct sunlight. For spot cleaning, use mild soap and a damp cloth. The durable materials are designed to withstand regular washing while maintaining their shape and comfort."
+            answer: "Attipas shoes are fully machine washable to 30 degrees celsius. Please use a laundry bag to preserve the fabric and air-dry only (avoid the dryer). Attipas shoes can be washed with your regular loads so no need for separate washes!"
         },
         {
             id: 5,
-            question: "What is your return and exchange policy?",
-            answer: "We offer a 30-day return and exchange policy for unworn items in original condition. If the size doesn't fit perfectly, we're happy to exchange for a different size at no extra cost. For returns, we provide free return shipping labels. Customer satisfaction is our priority, and we want to ensure you find the perfect shoes for your little one."
+            question: "Can Attipas shoes be worn both indoors and outdoors?",
+            answer: "Yes, absolutely! Attipas shoes can be worn indoor or outdoors and are fully machine washable. Avoid wet surfaces as Attipas shoes contain fine holes on the sole for breathability."
+        },
+        {
+            id: 6,
+            question: "Do I need to wear socks with Attipas Baby Shoes?",
+            answer: "No, socks are not required as Attipas shoes are fully lined with a cotton blend sock. However feel free to wear socks if you require more warmth in the cooler months."
+        },
+        {
+            id: 7,
+            question: "When should my child start wearing Attipas Kids Mesh Shoes?",
+            answer: "Attipas Kids Mesh Shoes are designed for older toddlers, preschoolers and children from US 7-12. They are the perfect choice of kids shoes once toddlers have  graduated from Attipas baby shoes. Free insoles are included with Kids Mesh Shoes."
         }
     ];
 
