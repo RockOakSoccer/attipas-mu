@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Minus, Plus, Star, ShieldCheck, Truck, RefreshCcw, Share2, Heart, Loader2, Eye } from "lucide-react";
@@ -114,6 +114,164 @@ interface ProductPageProps {
     params: {
         slug: string;
     };
+}
+
+// Zoomable Product Image Component
+interface ZoomableProductImageProps {
+    src: string;
+    alt: string;
+    badges?: string[];
+    zoomLevel?: number;
+}
+
+function ZoomableProductImage({
+    src,
+    alt,
+    badges = [],
+    zoomLevel = 2.5
+}: ZoomableProductImageProps) {
+    const [isZooming, setIsZooming] = useState(false);
+    const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+    const [backgroundPosition, setBackgroundPosition] = useState('0% 0%');
+    const imageRef = useRef<HTMLDivElement>(null);
+
+    const magnifierSize = 150; // Size of the magnifier box
+
+    const handleMouseEnter = useCallback(() => {
+        setIsZooming(true);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        setIsZooming(false);
+    }, []);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!imageRef.current) return;
+
+        const rect = imageRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // Calculate magnifier position (centered on cursor)
+        const magnifierX = Math.max(
+            magnifierSize / 2,
+            Math.min(x, rect.width - magnifierSize / 2)
+        );
+        const magnifierY = Math.max(
+            magnifierSize / 2,
+            Math.min(y, rect.height - magnifierSize / 2)
+        );
+
+        setMagnifierPosition({
+            x: magnifierX - magnifierSize / 2,
+            y: magnifierY - magnifierSize / 2
+        });
+
+        // Calculate background position for zoom
+        const backgroundX = (x / rect.width) * 150;
+        const backgroundY = (y / rect.height) * 150;
+        setBackgroundPosition(`${backgroundX}% ${backgroundY}%`);
+    }, [magnifierSize]);
+
+    return (
+        <div className="relative">
+            <div
+                ref={imageRef}
+                className="relative aspect-square bg-background-light-grey-alt rounded-xl overflow-hidden cursor-crosshair"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onMouseMove={handleMouseMove}
+            >
+                <Image
+                    src={src}
+                    alt={alt}
+                    fill
+                    className="object-cover"
+                    priority
+                />
+
+                {/* Badges */}
+                {badges.length > 0 && (
+                    <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                        {badges.map((badge) => (
+                            <span
+                                key={badge}
+                                className={`px-3 py-1 text-xs font-bold rounded-full ${badge === 'BESTSELLER' ? 'bg-accent-pink text-white' :
+                                    badge === 'SALE' ? 'bg-red-500 text-white' :
+                                        'bg-accent-blue-grey text-white'
+                                    }`}
+                            >
+                                {badge}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
+                {/* Magnifier Box */}
+                {isZooming && (
+                    <div
+                        className="absolute bg-transparent border-2 border-gray-500 shadow-lg pointer-events-none z-20"
+                        style={{
+                            left: `${magnifierPosition.x}px`,
+                            top: `${magnifierPosition.y}px`,
+                            width: `${magnifierSize}px`,
+                            height: `${magnifierSize}px`,
+                            boxShadow: '0 0 0 1px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15)'
+                        }}
+                    >
+                        {/* Inner border for better visibility */}
+                        <div className="absolute inset-1 border border-black/20 rounded-sm" />
+                    </div>
+                )}
+            </div>
+
+            {/* Zoomed Image Display - Desktop */}
+            {isZooming && (
+                <div className="absolute top-0 right-0 transform translate-x-full ml-4 z-30 hidden lg:block">
+                    <div
+                        className="w-150 h-150 border-2 border-white rounded-xl overflow-hidden shadow-xl bg-white"
+                        style={{
+                            backgroundImage: `url(${src})`,
+                            backgroundSize: `${zoomLevel * 100}%`,
+                            backgroundPosition: backgroundPosition,
+                            backgroundRepeat: 'no-repeat'
+                        }}
+                    >
+                        {/* Zoom level indicator */}
+                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            {zoomLevel}x
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile zoom overlay */}
+            {isZooming && (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center lg:hidden">
+                    <div className="relative w-11/12 h-96 max-w-md">
+                        <div
+                            className="w-full h-full rounded-xl overflow-hidden"
+                            style={{
+                                backgroundImage: `url(${src})`,
+                                backgroundSize: `${zoomLevel * 100}%`,
+                                backgroundPosition: backgroundPosition,
+                                backgroundRepeat: 'no-repeat'
+                            }}
+                        />
+                        <button
+                            className="absolute top-4 right-4 bg-white/90 hover:bg-white text-black rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold"
+                            onClick={() => setIsZooming(false)}
+                        >
+                            ×
+                        </button>
+                        <div className="absolute bottom-4 left-4 bg-black/70 text-white text-sm px-3 py-1 rounded">
+                            {zoomLevel}x zoom
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
@@ -328,31 +486,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Product Images */}
                     <div className="space-y-4">
-                        {/* Main Image */}
-                        <div className="relative aspect-square bg-background-light-grey-alt rounded-xl overflow-hidden">
-                            <Image
-                                src={product.images[selectedImage]}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                                priority
-                            />
-                            {product.badges.length > 0 && (
-                                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                                    {product.badges.map((badge) => (
-                                        <span
-                                            key={badge}
-                                            className={`px-3 py-1 text-xs font-bold rounded-full ${badge === 'BESTSELLER' ? 'bg-accent-pink text-white' :
-                                                badge === 'SALE' ? 'bg-red-500 text-white' :
-                                                    'bg-accent-blue-grey text-white'
-                                                }`}
-                                        >
-                                            {badge}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        {/* Main Image with Zoom */}
+                        <ZoomableProductImage
+                            src={product.images[selectedImage]}
+                            alt={product.name}
+                            badges={product.badges}
+                        />
 
                         {/* Thumbnail Images */}
                         {product.images.length > 1 && (

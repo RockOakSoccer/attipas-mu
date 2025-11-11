@@ -1158,7 +1158,7 @@ export async function getProductsByCollection(collection: string): Promise<Shopi
       variables
     );
 
-    console.log("This is product by collection", response)
+    // console.log("This is product by collection", response)
 
     return response.collection.products.edges.map((edge) => edge.node);
   } catch (error) {
@@ -1757,7 +1757,7 @@ export async function getCheckoutUrl(cartId: string): Promise<string | null> {
  * @param password - Customer password
  * @returns Promise<{accessToken: string, expiresAt: string} | null>
  */
-export async function loginCustomer(email: string, password: string): Promise<{accessToken: string, expiresAt: string} | null> {
+export async function loginCustomer(email: string, password: string): Promise<{ accessToken: string, expiresAt: string } | null> {
   const variables = {
     input: {
       email,
@@ -1767,11 +1767,11 @@ export async function loginCustomer(email: string, password: string): Promise<{a
 
   try {
     const response: ShopifyCustomerLoginResponse = await graphQLClient.request(CUSTOMER_LOGIN, variables);
-    
+
     if (response.customerAccessTokenCreate.customerUserErrors.length > 0) {
       throw new Error(response.customerAccessTokenCreate.customerUserErrors[0].message);
     }
-    
+
     return response.customerAccessTokenCreate.customerAccessToken || null;
   } catch (error) {
     console.error("Error logging in customer:", error);
@@ -1826,11 +1826,11 @@ export async function getCustomer(accessToken: string): Promise<ShopifyCustomer 
  * @returns Promise<{id: string, email: string} | null>
  */
 export async function createCustomer(
-  email: string, 
-  password: string, 
-  firstName?: string, 
+  email: string,
+  password: string,
+  firstName?: string,
   lastName?: string
-): Promise<{id: string, email: string} | null> {
+): Promise<{ id: string, email: string } | null> {
   const variables = {
     input: {
       email,
@@ -1842,19 +1842,19 @@ export async function createCustomer(
 
   try {
     const response: ShopifyCustomerCreateResponse = await graphQLClient.request(CUSTOMER_CREATE, variables);
-    
+
     if (response.customerCreate.customerUserErrors.length > 0) {
       const error = response.customerCreate.customerUserErrors[0];
-      
+
       // Check if this is an email verification message (not an actual error)
       if (error.message.includes('email') && error.message.includes('verify')) {
         // This is actually a success - customer was created but needs email verification
         return { id: 'pending-verification', email: email };
       }
-      
+
       throw new Error(error.message);
     }
-    
+
     return response.customerCreate.customer || null;
   } catch (error) {
     console.error("Error creating customer:", error);
@@ -1876,11 +1876,11 @@ export async function getOrderDetails(accessToken: string, orderId: string): Pro
 
   try {
     const response: ShopifyOrderDetailsResponse = await graphQLClient.request(GET_ORDER_DETAILS, variables);
-    
+
     if (response.customer && response.customer.orders.edges.length > 0) {
       return response.customer.orders.edges[0].node;
     }
-    
+
     return null;
   } catch (error) {
     console.error("Error getting order details:", error);
