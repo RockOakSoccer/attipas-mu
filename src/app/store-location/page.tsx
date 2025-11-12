@@ -207,18 +207,6 @@ const ContactInfo = () => {
             title: "Call Us",
             content: "+230 5816 5618",
             description: "Mon-Fri from 8am to 6pm"
-        },
-        {
-            icon: MapPin,
-            title: "Visit Us",
-            content: "10 Raoul Lejeune Street, 32000, Beau Bassin-Rose Hill, Mauritius",
-            description: "Our Store Location"
-        },
-        {
-            icon: Clock,
-            title: "Business Hours",
-            content: "Mon - Sat: 10am - 8pm",
-            description: "Sunday: 11am - 6pm"
         }
     ];
 

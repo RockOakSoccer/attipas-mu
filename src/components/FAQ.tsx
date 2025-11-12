@@ -8,7 +8,7 @@ const FAQ = () => {
     const faqs = [
         {
             id: 1,
-            question: "When should my babay start wearing Attipas Shoes ",
+            question: "When should my baby start wearing Attipas Shoes ",
             answer: "Typically, babies start standing, crawling and 'cruising' around furniture (walking with the aid of chairs and tables) around the 6-8 month mark, so we recommend wearing Attipas shoes from 6 months of age."
         },
         {
