@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import {
     Carousel,
     CarouselContent,
@@ -27,6 +28,7 @@ type Review = {
     reviewerName: string
     country: string
     slug: string
+    productHandle?: string
 }
 
 const reviewsData: Review[] = [
@@ -35,72 +37,78 @@ const reviewsData: Review[] = [
         rating: 5,
         date: '10/05/2025',
         title: 'Happy feet',
-        productName: 'Breathable Bamboo - Pop Peach',
+        productName: 'Attipas Butterfly Purple',
         productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
         reviewText: 'So happy with these . My daughter loves them.',
-        reviewerName: 'Caitlin H.',
+        reviewerName: 'Priscilla',
         country: 'Mauritius',
-        slug: 'pop-peach',
+        slug: 'butterfly-purple',
+        productHandle: 'butterfly-purple',
     },
     {
         id: 2,
         rating: 5,
         date: '09/18/2025',
         title: 'These socks are made for walking',
-        productName: 'Breathable Bamboo - Pop Peach',
-        productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
+        productName: 'Attipas Bird Yellow',
+        productImage: `${BASE_URL}/baby-shoe/shoe-details/bird/A25BI-Bird-1.webp`,
         reviewText: 'My baby absolutely loves these socks. She can still walk around comfortably and easily, whereas other brands hinder her steps.',
-        reviewerName: 'Michelle B.',
+        reviewerName: 'Sarah',
         country: 'Mauritius',
-        slug: 'pop-peach',
+        slug: 'bird-yellow',
+        productHandle: 'bird-yellow',
     },
     {
         id: 3,
         rating: 5,
         date: '09/10/2025',
         title: 'Perfect for my son',
-        productName: 'First Walking Shoes - Breathable Mesh (Blue)',
-        productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
+        productName: 'Attipas Whale Blue',
+        productImage: `${BASE_URL}/baby-shoe/shoe-details/whale/A25WH-Whale-1.webp`,
         reviewText: 'Perfect for my son',
-        reviewerName: 'Tiffany',
+        reviewerName: 'Yasmeen',
         country: 'Mauritius',
-        slug: 'pop-peach',
+        slug: 'whale-blue',
+        productHandle: 'whale-blue',
     },
     {
         id: 4,
         rating: 5,
         date: '07/21/2025',
         title: 'Soft and safe',
-        productName: 'First Walking Shoes - Breathable Mesh (Solid Grey)',
-        productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
-        reviewText: 'Some early shoes look great but aren’t safe. Attipas shoes look great, are very comfy, easy to put on, safe for walking, no trips, and securely strap.',
-        reviewerName: 'Cheryl E.',
+        productName: 'Attipas Bee Blue',
+        productImage: `${BASE_URL}/baby-shoe/shoe-details/bee/A25BE-Bee-1.webp`,
+        reviewText: "Some early shoes look great but aren't safe. Attipas shoes look great, are very comfy, easy to put on, safe for walking, no trips, and securely strap.",
+        reviewerName: 'Stephanie',
         country: 'Mauritius',
-        slug: 'pop-peach',
+        slug: 'bee-blue',
+        productHandle: 'bee-blue',
     },
     {
         id: 5,
         rating: 5,
         date: '07/20/2025',
         title: 'The only shoes my 1yo wears!!',
-        productName: 'First Walking Shoes - Breathable Mesh (Blue)',
-        slug: 'pop-peach',
-        productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
+        productName: 'Attipas Chameleon Orange',
+        productImage: `${BASE_URL}/baby-shoe/shoe-details/cameleon/Cameleon-1.webp`,
         reviewText: 'Bought this to try out because my toddler refused to wear any shoes (besides regular Attipas). He loves this mesh shoes so much that I have now bought one of each size, up until the largest size available. Very soft and super comfortable.',
-        reviewerName: 'Hui M.',
+        reviewerName: 'Julie',
         country: 'Mauritius',
+        slug: 'chameleon',
+        productHandle: 'chameleon',
     },
     {
         id: 6,
         rating: 5,
         date: '03/19/2025',
         title: 'Great shoes',
-        productName: 'First Walking Shoes - Breathable Mesh (Blue)',
-        slug: 'pop-peach',
-        productImage: `${BASE_URL}/baby-shoe/shoe-details/butterfly/A25BU-Butterfly-1.webp`,
+        productName: 'Attipas Tortoise Green',
+        productImage: `${BASE_URL}/baby-shoe/shoe-details/tortoise/A25TO-Tortoise-1.webp`,
         reviewText: 'These shoes have been great, our little one loves wearing them and is extremely confident in wearing them.',
-        reviewerName: 'Michelle S.',
+        reviewerName: 'Raniyah',
         country: 'Mauritius',
+        slug: 'tortoise-green',
+        productHandle: 'tortoise-green',
     },
 ];
 
@@ -130,12 +138,25 @@ const ReviewCard = ({ review }: { review: Review }) => (
 
         <div className="mt-auto pt-4 border-t border-gray-100 flex items-start gap-3">
             {review.productImage ? (
-                <Image src={review.productImage} width={80} height={80} alt={review.productName} className="w-20 h-20 rounded-md object-cover flex-shrink-0" />
+                <Link href={`/products/${review.productHandle || review.slug}`} className="flex-shrink-0">
+                    <Image
+                        src={review.productImage}
+                        width={80}
+                        height={80}
+                        alt={review.productName}
+                        className="w-20 h-20 rounded-md object-cover hover:opacity-80 transition-opacity"
+                    />
+                </Link>
             ) : (
                 <div className="w-20 h-20 rounded-md bg-gray-200 flex-shrink-0" />
             )}
             <div className="flex flex-col justify-start h-full text-sm">
-                <a href="#" className="font-bold text-text-primary hover:underline text-xs">{review.productName}</a>
+                <Link
+                    href={`/products/${review.productHandle || review.slug}`}
+                    className="font-bold text-text-primary hover:underline text-xs"
+                >
+                    {review.productName}
+                </Link>
                 <p className="text-gray-600 mt-1">{review.reviewerName}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                     <Image src="https://s3-us-west-2.amazonaws.com/stamped.io/cdn/images/shopify_verified-by-shop-gray.svg" width={90} height={16} alt="Verified by SHOP" className="h-4 w-auto" />
@@ -176,8 +197,8 @@ export default function Testimonial() {
                             What our customers are saying
                         </p>
                         <div className="flex items-center gap-3">
-                            <StarRating rating={4} />
-                            <span className="text-sm text-gray-700 font-medium">1000 Reviews</span>
+                            <StarRating rating={5} />
+                            <span className="text-sm text-gray-700 font-medium">789 Reviews</span>
                             <CarouselPrevious className="relative h-9 w-9 translate-y-0 left-0 top-0 rounded-full bg-[#d68972] text-white border-none hover:bg-[#d68972]/80 cursor-pointer" />
                             <CarouselNext className="relative h-9 w-9 translate-y-0 right-0 top-0 rounded-full bg-[#d68972] text-white border-none hover:bg-[#d68972]/80 cursor-pointer" />
                         </div>

@@ -36,11 +36,16 @@ const products: Product[] = [
         title: "Attipas Baby Shoe Cameleon",
         image: `${BASE_URL}/branding/A25CH-Cameleon-20.webp`,
     },
+    // {
+    //     title: "Attipas Baby Shoe Pom Pom",
+    //     image: `${BASE_URL}/branding/PMC_4741.webp`,
+    // }
     {
-        title: "Attipas Baby Shoe Pom Pom",
-        image: `${BASE_URL}/branding/PMC_4741.webp`,
+        title: "Attipas Kid's Shoe",
+        image: `${BASE_URL}/kids-shoe/attipas-skin-shoes/deep-green/Deep-Green-16.webp`,
     }
 ];
+
 
 const HeroCarousel = () => {
     const [currentIndex, setCurrentIndex] = useState(0);

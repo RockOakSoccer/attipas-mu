@@ -2,6 +2,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ShopProductsGrid from "@/components/ProductGrid";
 import Link from "next/link";
+import Testimonial from "@/components/sections/Testimonial";
 
 export default function AllProductsPage() {
   return (
@@ -32,6 +33,7 @@ export default function AllProductsPage() {
 
         <ShopProductsGrid collectionType="All" />
       </main>
+      <Testimonial />
 
       <Footer />
     </div>

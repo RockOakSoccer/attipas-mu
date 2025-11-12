@@ -123,7 +123,7 @@ const ContactForm = () => {
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="(+230) 5816 5618"
                         className="h-12 bg-white border-[#e0e0e0] focus-visible:ring-[#2B2B2B]"
                     />
                 </div>
@@ -205,14 +205,14 @@ const ContactInfo = () => {
         {
             icon: Phone,
             title: "Call Us",
-            content: "+1 (555) 123-4567",
+            content: "+230 5816 5618",
             description: "Mon-Fri from 8am to 6pm"
         },
         {
             icon: MapPin,
             title: "Visit Us",
-            content: "Port Louis, Mauritius",
-            description: "Our flagship store"
+            content: "10 Raoul Lejeune Street, 32000, Beau Bassin-Rose Hill, Mauritius",
+            description: "Our Store Location"
         },
         {
             icon: Clock,

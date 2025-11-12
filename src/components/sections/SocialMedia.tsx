@@ -26,7 +26,7 @@ const SocialMediaSection = () => {
                         >
                             <a href="https://www.instagram.com/attipasmauritius/" target="_blank" rel="noopener noreferrer">
                                 <Instagram className="w-4 h-4" />
-                                <span>@attipa_mu</span>
+                                <span>@attipas_mu</span>
                             </a>
                         </Button>
                     </div>
