@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ZoomIn, X } from "lucide-react";
 import { ModelData } from "@/lib/models.utils";
+import Link from "next/link";
 
 // Type definitions
 type ColorData = {
@@ -214,14 +215,19 @@ export default function ModelContent({ model }: { model: ModelData }) {
                                                     {color.name}
                                                 </span>
                                                 <div className="w-25 h-25 rounded overflow-hidden border border-border flex-shrink-0">
-                                                    <Image
-                                                        src={color.colorImages}
-                                                        alt={`${model.name} color variant ${index + 1}`}
-                                                        width={100}
-                                                        height={100}
-                                                        className="w-full h-full object-cover border-2"
-                                                        quality={100}
-                                                    />
+
+                                                    {/* Link each image to the product page */}
+                                                    <Link href={`/collections/all-products`}>
+                                                        <Image
+                                                            src={color.colorImages}
+                                                            alt={`${model.name} color variant ${index + 1}`}
+                                                            width={100}
+                                                            height={100}
+                                                            className="w-full h-full object-cover border-2"
+                                                            quality={100}
+
+                                                        />
+                                                    </Link>
                                                 </div>
                                             </div>
                                         ))}

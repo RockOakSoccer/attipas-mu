@@ -7,6 +7,7 @@ import { Menu, Search, User, ShoppingCart, ChevronDown } from "lucide-react";
 import { useShopifyCart } from "@/contexts/shopify-cart-context";
 import { useCurrency } from "@/contexts/currency-context";
 import { shopifyAuth } from "@/lib/shopify-auth";
+import SearchComponent from "@/components/SearchComponent";
 
 import { cn } from "@/lib/utils";
 import {
@@ -207,10 +208,10 @@ export default function Nav() {
 
         <div className="flex flex-1 items-center justify-end space-x-2 lg:space-x-4">
           <div className="hidden lg:flex items-center space-x-2">
-            {/* Search Button */}
-            {/* <Button variant="ghost" size="icon" aria-label="Search" className="cursor-pointer">
-              <Search className="h-10 w-10 text-text-primary font-bold" />
-            </Button> */}
+            {/* Search Component */}
+            <div className="mr-4">
+              <SearchComponent className="w-80" />
+            </div>
             {/* Account Button */}
             <Button
               variant="ghost"

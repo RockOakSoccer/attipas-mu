@@ -5,6 +5,7 @@ import "./globals.css";
 // import ErrorReporter from "@/components/ErrorReporter";
 import { ShopifyCartProvider } from "@/contexts/shopify-cart-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
+import { SearchProvider } from "@/contexts/search-context";
 
 
 export const metadata: Metadata = {
@@ -37,7 +38,9 @@ export default function RootLayout({
         /> */}
         <CurrencyProvider>
           <ShopifyCartProvider>
-            {children}
+            <SearchProvider>
+              {children}
+            </SearchProvider>
           </ShopifyCartProvider>
         </CurrencyProvider>
         <Analytics />
