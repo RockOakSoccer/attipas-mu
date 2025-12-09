@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Minus, Plus, Star, ShieldCheck, Truck, RefreshCcw, Share2, Heart, Loader2, Eye } from "lucide-react";
+import { ChevronRight, Minus, Plus, ShieldCheck, RefreshCcw, Loader2, Eye } from "lucide-react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { useShopifyCart } from "@/contexts/shopify-cart-context";
